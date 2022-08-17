@@ -10,12 +10,10 @@ import com.example.springredditclone.repository.PostRepository;
 import com.example.springredditclone.repository.SubredditRepository;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentMatchers;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Mockito;
+import org.mockito.*;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import java.time.Instant;
@@ -27,24 +25,23 @@ public class PostServiceTest {
 
     @InjectMocks
     PostService postService;
-
     @Mock
     private PostRepository postRepository;
-
     @Mock
     private PostMapper postMapper;
-
     @Mock
     private SubredditRepository subredditRepository;
-
     @Mock
     private AuthService authService;
+
+    @Captor
+    private ArgumentCaptor<Post> postArgumentCaptor;
 
     @Test
     @DisplayName("Should find post by ID")
     public void shouldFindPostById() {
-        Post post = new Post(123L, "First Post", "http://url.site", "Test", 0, null, Instant.now(), null);
         PostResponse expectedPostResponse = new PostResponse(123L, "First Post", "http://url.site", "test", "test user", "test subreddit", 0, 0, "1 Hour Ago", false, false);
+        Post post = new Post(123L, "First Post", "http://url.site", "Test", 0, null, Instant.now(), null);
 
         Mockito.when(postRepository.findById(123L)).thenReturn(Optional.of(post));
         Mockito.when(postMapper.mapPostToDto(post)).thenReturn(expectedPostResponse);
@@ -73,6 +70,14 @@ public class PostServiceTest {
 
         //We need to test the Save method in such a way since it doesn't return any value.
         //Allows access to the actual method and checks the number of invocations on the method.
-        Mockito.verify(postRepository, Mockito.times(1)).save(ArgumentMatchers.any(Post.class));
+
+        //Here we are only checking the number of invocations
+//        Mockito.verify(postRepository, Mockito.times(1)).save(ArgumentMatchers.any(Post.class));
+
+        //Now we will also verify the request using Argument Captor
+        Mockito.verify(postRepository, Mockito.times(1)).save(postArgumentCaptor.capture());
+
+        Assertions.assertThat(postArgumentCaptor.getValue().getPostId()).isEqualTo(123L);
+        Assertions.assertThat(postArgumentCaptor.getValue().getPostName()).isEqualTo("First Post");
     }
 }
