@@ -1,7 +1,6 @@
-package repository;
+package com.example.springredditclone.repository;
 
 import com.example.springredditclone.model.User;
-import com.example.springredditclone.repository.UserRepository;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
